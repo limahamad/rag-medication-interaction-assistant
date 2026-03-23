@@ -1,227 +1,187 @@
-# Drug Interaction Assistant
+# Medication Interaction RAG Assistant
 
-## Project Description
-The Drug Interaction Assistant is an AI-powered system designed to answer medication-related questions, with a focus on **drug–drug interaction detection**. The system analyzes user queries, identifies the mentioned drug names and then check interactions at the **ingredient level**, which improves accuracy because many brand names may contain the same active compounds.
+This project is a Streamlit-based medication interaction assistant built with retrieval-augmented generation (RAG). It retrieves supporting medication documents from a local FAISS + BM25 index, sends the grounded context to Gemini, and returns a structured answer with cited sources.
 
-The system also uses a **Retrieval-Augmented Generation (RAG)** architecture to retrieve relevant drug information from a knowledge base before generating responses with a large language model. By combining ingredient-level interaction detection with contextual retrieval, the assistant provides more reliable and medically grounded responses.
+The project also includes an evaluation workspace for rating generated answers and scripts for building the RAG index and generating saved evaluation figures for different retrieval settings.
 
-The workflow ensures that even if users provide brand names, misspellings, or different drug formats, the system can normalize them and evaluate interactions based on the underlying active ingredients.
+## Implemented Features
 
----
+- Streamlit app with two tabs:
+  - `Assistant` for normal question answering
+  - `Evaluation` for running test cases and rating outputs
+- Hybrid retrieval:
+  - dense retrieval with `sentence-transformers` + FAISS
+  - lexical retrieval with BM25-style scoring
+  - fused ranking between dense and lexical scores
+- Gemini-based grounded answer generation
+- Main Source and Other Sources display based on the citations actually used in the answer
+- Evaluation workflow with manual rating for:
+  - Accuracy
+  - Clarity
+  - Safety
+  - Groundedness
+  - Citation Accuracy
+  - Retrieval Relevance
+- Saved evaluation plots inside the app
+- Standalone `plot_figures.py` script to generate Matplotlib figures for:
+  - `K=3`
+  - `K=5`
+  - `K=7`
 
-# System Architecture
+## Project Structure
 
-The system consists of several modules that process a user query and determine possible drug interactions.
-
-```
-User Query
-     |
-     v
-Drug Name Extraction
-     |
-     v
-Drug Name Normalization
-(brand → standardized drug name)
-     |
-     v
-Ingredient Mapping
-(drug → active ingredients)
-     |
-     v
-Ingredient-Level Interaction Check
-     |
-     v
-Retrieval System (RAG)
-     |
-Retrieve Relevant Drug Information
-     |
-     v
-LLM Response Generation
-     |
-     v
-Final Answer
-```
-
----
-
-# Architecture Components
-
-## User Interface
-- Built using **Streamlit**
-- Allows users to ask natural language questions about medications and drug interactions
-
-## Drug Name Normalization
-- Converts user-provided drug names to standardized names
-- Handles brand names, spelling variations, and synonyms
-
-Example:
-
-```
-Advil → Ibuprofen
-Tylenol → Acetaminophen
-```
-
-## Ingredient Mapping
-Each normalized drug is mapped to its **active ingredients**.
-
-Example:
-
-```
-Advil → Ibuprofen
-Augmentin → Amoxicillin + Clavulanic Acid
-```
-
-## Ingredient-Level Interaction Detection
-Drug interactions are determined by checking **interactions between active ingredients**, not just drug names.
-
-Example:
-
-```
-Drug A: Augmentin → Amoxicillin + Clavulanic Acid
-Drug B: Warfarin → Warfarin
-
-Check interactions:
-Amoxicillin ↔ Warfarin
-Clavulanic Acid ↔ Warfarin
-```
-
-This approach ensures more accurate detection of interactions.
-
-## Retrieval-Augmented Generation (RAG)
-
-The system retrieves relevant drug information before generating responses.
-
-Steps:
-1. Drug documents are split into text chunks
-2. Each chunk is converted into vector embeddings
-3. Embeddings are stored in a **vector database**
-4. When a query is received, similar documents are retrieved
-5. Retrieved context is passed to the **language model** to generate a grounded answer
-
----
-
-# Project Structure
-
-```
-drug-interaction-assistant/
-│
-├── app.py
-├── interaction_engine.py
-├── normalization.py
-├── rag_pipeline.py
-│
-├── data/
-│   ├── drug_database.json
-│   └── interaction_data.json
-│
-├── vector_db/
-│
+```text
+Assignment2/
+├── .streamlit/
+│   └── secrets.toml                # local only, not for GitHub
+├── figures/                        # saved Matplotlib figures from plot_figures.py
+│   ├── k_3/
+│   ├── k_5/
+│   └── k_7/
+├── rag_index/
+│   ├── docs.index
+│   ├── chunks.pkl
+│   └── bm25.pkl
+├── A1_Hamad _testcases.json        # evaluation test cases
+├── app.py                          # Streamlit app
+├── build_index.py                  # builds FAISS + BM25 index
+├── drug_docs.json                  # document collection used for retrieval
+├── evaluation_outputs_to_score.csv # prompt-only baseline scores (Model B used)
+├── evaluation_ratings_K_3.csv      # RAG ratings for K=3
+├── evaluation_ratings_K_5.csv      # RAG ratings for K=5
+├── evaluation_ratings_K_7.csv      # RAG ratings for K=7
+├── plot_figures.py                 # saves paper-style Matplotlib figures
 ├── requirements.txt
 └── README.md
 ```
 
----
+## Retrieval Pipeline
 
-# Setup Instructions
+The retrieval pipeline works as follows:
 
-## 1. Clone the Repository
+1. Documents from `drug_docs.json` are split into chunks.
+2. Each chunk is embedded using `all-MiniLM-L6-v2`.
+3. Dense vectors are stored in a FAISS index.
+4. BM25-style lexical statistics are also precomputed.
+5. At query time:
+   - dense similarity scores are computed
+   - BM25 lexical scores are computed
+   - both are normalized and fused
+6. The top-ranked chunks are passed to Gemini as grounded context.
 
-```bash
-git clone https://github.com/yourusername/drug-interaction-assistant.git
-cd drug-interaction-assistant
+## Evaluation Workflow
+
+The `Evaluation` tab lets you:
+
+1. choose a test case from `A1_Hamad_testcases.json`
+2. run the query through the RAG pipeline
+3. inspect the generated answer
+4. rate six evaluation dimensions
+5. display evaluation plots at any time
+
+The app also compares RAG against prompt-only baseline scores from `evaluation_outputs_to_score.csv`, using shared test-case IDs only.
+
+## Saved Figures
+
+`plot_figures.py` reads:
+
+- `evaluation_ratings_K_3.csv`
+- `evaluation_ratings_K_5.csv`
+- `evaluation_ratings_K_7.csv`
+- `evaluation_outputs_to_score.csv` using only Model B columns
+
+and saves PNG figures to:
+
+```text
+figures/
+├── k_3/
+├── k_5/
+└── k_7/
 ```
 
----
+Generated figures include:
 
-## 2. Create a Virtual Environment
+- `ratings_per_query.png`
+- `prompting_only_vs_rag_enhanced.png`
+- `overall_score_distribution_across_test_cases.png`
+- `mean_overall_score_by_category.png`
+- `rag_specific_metric_means.png`
+- `rag_specific_score_distribution_across_test_cases.png`
+- `rag_specific_mean_score_by_category.png`
+- `retrieval_quality_vs_answer_accuracy.png`
+
+## Setup
+
+### 1. Create and activate a virtual environment
+
+Windows:
 
 ```bash
-python -m venv venv
+python -m venv llm_layth_A2
+llm_layth_A2\Scripts\activate
 ```
 
-Activate the environment.
-
-### Mac / Linux
-
-```bash
-source venv/bin/activate
-```
-
-### Windows
-
-```bash
-venv\Scripts\activate
-```
-
----
-
-## 3. Install Dependencies
+### 2. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
+### 3. Configure Streamlit secrets
 
-## 4. Configure API Key
+Create:
 
-Create a `.env` file in the project directory.
-
-```
-OPENAI_API_KEY=your_api_key_here
+```text
+.streamlit/secrets.toml
 ```
 
----
+with:
 
-## 5. Run the Application
+```toml
+GOOGLE_API_KEY = "your_google_api_key_here"
+```
 
-Start the Streamlit interface:
+Do not commit this file to GitHub.
+
+### 4. Build the retrieval index
+
+```bash
+python build_index.py
+```
+
+This creates:
+
+- `rag_index/docs.index`
+- `rag_index/chunks.pkl`
+- `rag_index/bm25.pkl`
+
+### 5. Run the app
 
 ```bash
 streamlit run app.py
 ```
 
-The application will open in your browser.
+## Generate Figures
 
----
+To generate all saved evaluation figures:
 
-# Example Queries
-
-Users can ask questions such as:
-
-```
-Can I take Advil with warfarin?
-Does ibuprofen interact with aspirin?
-Is it safe to take Tylenol with amoxicillin?
-What drugs interact with metformin?
+```bash
+python plot_figures.py
 ```
 
-The system will:
-1. Extract drug names
-2. Normalize them
-3. Map them to ingredients
-4. Check ingredient-level interactions
-5. Generate an explanation of the interaction
-
----
-
-# Technologies Used
+## Main Dependencies
 
 - Python
 - Streamlit
-- OpenAI API
-- Vector Database (Chroma / FAISS)
-- Retrieval-Augmented Generation (RAG)
-- Drug normalization and ingredient mapping
+- FAISS
+- Sentence Transformers
+- Google Generative AI
+- NumPy
+- Matplotlib
 
----
+## Notes
 
-# Future Improvements
-
-Potential improvements include:
-
-- Expanding the drug database with larger pharmaceutical datasets
-- Adding interaction severity classification
-- Providing citations from medical sources
-- Supporting multi-drug interaction analysis
-- Integrating official medical knowledge bases such as DrugBank or RxNorm
+- `secrets.toml` should stay local and be ignored by Git.
+- The prompt-only comparison uses Model B values only.
+- The RAG vs prompt-only comparison is aligned by shared test-case IDs.
+- The plotting script uses Matplotlib and saves publication-style PNG files.
