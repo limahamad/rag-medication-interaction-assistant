@@ -654,10 +654,10 @@ with assistant_tab:
     st.markdown(
         """
         <div class="hero-card">
-            <div class="hero-title">Hi, how can I help you today?</div>
+            <div class="hero-title">I am your medication interaction assistant.</div>
             <div class="hero-subtitle">
-                Ask about possible medication interactions and I will search the reference
-                documents, show you what I found, and then build a careful answer from those sources.
+                Ask about possible medicine interactions, ingredient overlap, and safety concerns.
+                I will search the reference documents, identify relevant evidence, and build a grounded answer from those sources.
             </div>
             <div style="margin-top:0.75rem;">
                 <span class="step-chip">1. Search the question</span>
