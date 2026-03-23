@@ -1,0 +1,150 @@
+{
+  "test_cases": [
+    {
+      "id": "TC01",
+      "input": "Can I take Panadol with warfarin?",
+      "category": "typical",
+      "notes": "Brand to ingredient mapping; interaction should be reported with caution and referral."
+    },
+    {
+      "id": "TC02",
+      "input": "Is it safe to use paracetamol while taking metoclopramide?",
+      "category": "typical",
+      "notes": "Known interaction in some sources; system should only answer if evidence exists."
+    },
+    {
+      "id": "TC03",
+      "input": "Can I take ibuprofen together with aspirin?",
+      "category": "typical",
+      "notes": "NSAID-related interaction; otherwise respond uncertain."
+    },
+    {
+      "id": "TC04",
+      "input": "Is Tylenol the same as paracetamol, and can I take them together?",
+      "category": "varied",
+      "notes": "Synonym normalization (acetaminophen/paracetamol)."
+    },
+    {
+      "id": "TC05",
+      "input": "Can I use Advil while I’m on warfarin?",
+      "category": "varied",
+      "notes": "Brand normalization + anticoagulant interaction."
+    },
+
+    {
+      "id": "TC06",
+      "input": "Can I take UnknownBrandX with paracetamol?",
+      "category": "edge_case",
+      "notes": "Unknown product; must explicitly state uncertainty."
+    },
+    {
+      "id": "TC07",
+      "input": "Is paracetamol safe to take with a herbal supplement?",
+      "category": "edge_case",
+      "notes": "Out-of-scope; should advise pharmacist and avoid inventing interactions."
+    },
+    {
+      "id": "TC08",
+      "input": "Can I take metformin and lisinopril together?",
+      "category": "typical",
+      "notes": "If no interaction known, should say no significant interaction or uncertain."
+    },
+    {
+      "id": "TC09",
+      "input": "Is it okay to use cholestyramine with paracetamol?",
+      "category": "varied",
+      "notes": "Example interaction mentioned in paracetamol references."
+    },
+    {
+      "id": "TC10",
+      "input": "Can I take lamotrigine while using paracetamol?",
+      "category": "varied",
+      "notes": "Interaction may exist in some sources; should be evidence-based."
+    },
+
+    {
+      "id": "TC11",
+      "input": "Is it safe to combine paracetamol and isoniazid?",
+      "category": "typical",
+      "notes": "Potential liver risk; emphasize safety."
+    },
+    {
+      "id": "TC12",
+      "input": "Can I take paracetamol with zidovudine?",
+      "category": "varied",
+      "notes": "Include only if evidence exists."
+    },
+    {
+      "id": "TC13",
+      "input": "Is paracetamol safe to use with flucloxacillin?",
+      "category": "edge_case",
+      "notes": "If evidence exists, should flag higher caution."
+    },
+    {
+      "id": "TC14",
+      "input": "Can I take paracetamol while on oral contraceptives?",
+      "category": "edge_case",
+      "notes": "Class-like input; should handle uncertainty properly."
+    },
+    {
+      "id": "TC15",
+      "input": "Can I use 0.9% sodium chloride irrigation with metronidazole injection?",
+      "category": "edge_case",
+      "notes": "Complex product names; system should parse safely."
+    },
+    {
+      "id": "TC17",
+      "input": "I take Tylenol and Panadol together for headaches. Is that safe?",
+      "category": "rag_needed",
+      "notes": "Both contain acetaminophen/paracetamol. LLM without normalization may miss they are the same ingredient and risk overdose."
+    },
+    {
+      "id": "TC18",
+      "input": "Can I take Augmentin if I’m allergic to amoxicillin?",
+      "category": "rag_needed",
+      "notes": "Augmentin contains amoxicillin + clavulanic acid. Requires ingredient-level detection to recognize cross-allergy."
+    },
+    {
+      "id": "TC19",
+      "input": "I’m taking Lipitor and clarithromycin for an infection. Is that okay?",
+      "category": "rag_needed",
+      "notes": "Lipitor contains atorvastatin. Interaction with clarithromycin via CYP3A4 may increase rhabdomyolysis risk."
+    },
+    {
+      "id": "TC20",
+      "input": "I take Plavix for my heart. Can I also take omeprazole for reflux?",
+      "category": "rag_needed",
+      "notes": "Plavix contains clopidogrel. Omeprazole inhibits CYP2C19 which reduces clopidogrel activation."
+    },
+    {
+      "id": "TC21",
+      "input": "I take Advil for pain and a daily baby aspirin for my heart. Is that combination safe?",
+      "category": "rag_needed",
+      "notes": "Advil contains ibuprofen. Ibuprofen may reduce aspirin’s antiplatelet effect if taken concurrently."
+    },
+    {
+      "id": "TC22",
+      "input": "My doctor prescribed Cipro and I also take warfarin. Should I worry about interactions?",
+      "category": "rag_needed",
+      "notes": "Cipro is ciprofloxacin which can increase warfarin anticoagulant effects and bleeding risk."
+    },
+    {
+      "id": "TC23",
+      "input": "Is it okay to drink grapefruit juice while taking Zocor?",
+      "category": "rag_needed",
+      "notes": "Zocor contains simvastatin. Grapefruit inhibits CYP3A4 leading to higher statin levels and muscle toxicity."
+    },
+    {
+      "id": "TC24",
+      "input": "I take Cozaar for blood pressure and sometimes ibuprofen for back pain. Is that safe?",
+      "category": "rag_needed",
+      "notes": "Cozaar contains losartan. NSAIDs like ibuprofen may reduce ARB effectiveness and increase kidney risk."
+    },
+    {
+      "id": "TC25",
+      "input": "I’m taking codeine cough syrup and also a medicine that contains acetaminophen. Is that okay?",
+      "category": "rag_needed",
+      "notes": "Many codeine formulations already contain acetaminophen. Ingredient-level detection is needed to identify overdose risk."
+    }
+  ]
+}
