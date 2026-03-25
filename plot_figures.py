@@ -6,6 +6,7 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import pandas as pd
+from matplotlib.colors import LinearSegmentedColormap
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -51,6 +52,10 @@ FIGURE_FACE = "#ffffff"
 AXIS_FACE = "#ffffff"
 TEXT_COLOR = "#111827"
 GRID_COLOR = "#cbd5e1"
+HEATMAP_BLUE_CMAP = LinearSegmentedColormap.from_list(
+    "heatmap_blue",
+    ["#eff6ff", "#dbeafe", "#93c5fd", "#60a5fa"],
+)
 
 
 def apply_dark_style(ax):
@@ -218,7 +223,7 @@ def plot_rag_specific_mean_by_category_heatmap(rag_frame: pd.DataFrame, output_d
         matrix.append([float(category_rows[m].mean()) for m in RAG_SPECIFIC_METRICS])
 
     fig, ax = plt.subplots(figsize=(8, max(4, len(available_categories) * 1.2)))
-    im = ax.imshow(matrix, cmap="viridis", vmin=1, vmax=5, aspect="auto")
+    im = ax.imshow(matrix, cmap=HEATMAP_BLUE_CMAP, vmin=1, vmax=5, aspect="auto")
     ax.set_title("RAG-Specific Mean Score By Test Case Category")
     ax.set_xticks(range(len(RAG_SPECIFIC_METRICS)))
     ax.set_xticklabels([METRIC_LABELS[m] for m in RAG_SPECIFIC_METRICS], rotation=20, ha="right")
@@ -317,7 +322,7 @@ def plot_mean_overall_by_category_heatmap(prompt_frame: pd.DataFrame, rag_frame:
         return
 
     fig, ax = plt.subplots(figsize=(7, max(4, len(row_labels) * 1.2)))
-    im = ax.imshow(rows, cmap="viridis", vmin=1, vmax=5, aspect="auto")
+    im = ax.imshow(rows, cmap=HEATMAP_BLUE_CMAP, vmin=1, vmax=5, aspect="auto")
     ax.set_title("Mean Overall Score By Test Case Category")
     ax.set_xticks([0, 1])
     ax.set_xticklabels(["Prompting Only", "RAG Enhanced"])
